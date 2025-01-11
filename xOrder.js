@@ -376,7 +376,7 @@ function moveColumnData(table, fromIndex, toIndex) {
 function changeColumnHeader(table, columnIndex, newHeader) {
     const cell = table.rows[0].cells[columnIndex];
     cell.textContent = newHeader;
-    cell.style.fontSize = 'smaller'; // 將字體縮小一級
+    cell.style.fontSize = '60%'; // 將字體縮小一級
 }
 
 function processColumn(table, colIndex, columnName, floatingWindow) {
