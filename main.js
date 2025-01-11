@@ -241,13 +241,13 @@
             const heightResult = priceDatabase.findNextRange(height, priceDatabase.heightRanges);
 
             if (!widthResult || !heightResult) {
-                return "查無此價格，請輸入更小的寬度或高度";
+                return "not found, input smaller value";
             }
 
             const { index: widthIndex } = widthResult;
             const { index: heightIndex } = heightResult;
 
-            const result = table?.[heightIndex]?.[widthIndex] ?? "查無此價格";
+            const result = table?.[heightIndex]?.[widthIndex] ?? "not found";
             cache.set(key, result);
             return result;
         };
@@ -274,7 +274,7 @@
             if (value === '' || isValidInput(value, minValue, maxValue)) {
                 if (dataTable.activeCell.cellIndex === 1 || dataTable.activeCell.cellIndex === 2) {
                     if (value === '') {
-                        inputError.textContent = 'W列和H列不能輸入空白值';
+                        inputError.textContent = 'no blank left in W or H ';
                         dataTable.activeCell.classList.add('invalid-input');
                         return;
                     }
@@ -295,7 +295,7 @@
                     if (wCell.textContent) {
                         createButtonsAndSetDefaults(row);
                     } else {
-                        inputError.textContent = 'W列單元格為空白，請先輸入W列的值';
+                        inputError.textContent = 'W is blank ';
                         wCell.classList.add('invalid-input');
                         dataTable.setActiveCell(wCell);
                         numberInput.focus();
@@ -316,7 +316,7 @@
                     if (!wCell.textContent) {
                         wCell.classList.add('invalid-input');
                         dataTable.setActiveCell(wCell);
-                        inputError.textContent = 'W列單元格為空白，請輸入W列的值';
+                        inputError.textContent = 'W is blank';
                         numberInput.focus();
                         return;
                     }
@@ -344,7 +344,7 @@
                 dataTable.activeCell.textContent = '';
                 dataTable.activeCell.classList.add('error', 'invalid-input');
                 numberInput.style.backgroundColor = 'var(--error-color)';
-                inputError.textContent = isChainCell ? '請輸入250到3000之間的數字或留空' : '請輸入250到3500之間的數字';
+                inputError.textContent = isChainCell ? 'Input 250-3000' : 'input 250-3500';
             } else {
                 if (dataTable.activeCell.cellIndex === 2) {
                     const row = dataTable.activeCell.parentElement;
@@ -436,7 +436,7 @@
             inputError.textContent = '';
         } else {
             numberInput.style.backgroundColor = 'var(--error-color)';
-            inputError.textContent = isChainCell ? '請輸入250到3000之間的數字或留空' : '請輸入250到3500之間的數字';
+            inputError.textContent = isChainCell ? 'input 250-3000' : 'input 250-3500';
         }
     };
 
