@@ -1,591 +1,729 @@
-function xOrder() {
-    // Create a floating window
-    const floatingWindow = window.open('', 'xOrderWindow', 'width=1000,height=1600');
+// 導入按鈕功能
+//import { deleteRow, insertRow } from './button.js';
+// 導入 xQuo 函數
+//import { xQuo } from './xQuo.js';
 
-    // Define the HTML content directly in the JavaScript
-    const htmlContent = `
-    <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EZ Blinds & Shutters Quotation</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
+// 主應用邏輯
+(function () {
+    class DataTable {
+        constructor(tableElement) {
+            this.table = tableElement;
+            this.activeCell = null;
+            this.numberInput = document.getElementById('numberInput');
+            this.initializeTable();
+            this.setupEventListeners();
         }
 
-        .section {
-            width: 20cm;
-            margin: 0 auto;
-        }
-
-        .header {
-            background-color: #F2F2F2;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            height: 200px;
-            /* 設定高度為 100px */
-        }
-
-        .header h1 {
-            color: #E97132;
-            margin: 0;
-        }
-
-        .company-info {
-            text-align: Left;
-        }
-
-        .middle-container {
-            width: 20cm;
-            height: 25cm;
-            border: 1px solid black;
-            margin: 20px auto;
-        }
-
-    .bottom-section {
-    display: flex;
-    flex-direction: column;  /* 垂直排列元素 */
-    justify-content: flex-start;  /* 可選，讓元素從上往下排列 */
-    align-items: flex-start;  /* 可選，對齊方式設為左側 */
-}
-
-
-
-        .date-input {
-            border: none;
-            border-bottom: 1px solid #333;
-            padding: 5px 0;
-            width: 100px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="section header">
-        <div>
-            <h1>Order list</h1>
-
-            <p>Customer: <span contenteditable="true"></span></p>
-            <p>Address: <span contenteditable="true"></span></p>
-            <p>Phone: <span contenteditable="true"></span></p>
-
-            <strong>Issue Date:</strong> <input type="text" class="date-input" id="issueDate">
-            <strong>Due Date:</strong> <input type="text" class="date-input" id="dueDateDisplay">
-        </div>
-        <div class="company-info">
-            <h2>Company: <span contenteditable="true"></span></h2>
-            <p>Ref: <span contenteditable="true"></span></p>
-            <p>email: ezblinds＠ezbns.com.au</p>
-
-        </div>
-    </div>
-
-    <div class="section middle-container">
-        <!-- Content for the middle section can be added here -->
-    </div>
-
-    <div class="section bottom-section">
-    </div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            function formatDate(date) {
-                var day = date.getDate();
-                var month = date.getMonth() + 1;
-                var year = date.getFullYear();
-                return \`\${day < 10 ? '0' + day : day}/\${month < 10 ? '0' + month : month}/\${year}\`;
+        initializeTable() {
+            const tbody = this.table.querySelector('tbody');
+            tbody.innerHTML = '';
+            for (let i = 1; i <= 20; i++) {
+                this.addNewRow(tbody);
             }
+        }
 
-            var issueDateInput = document.getElementById("issueDate");
-            var dueDateDisplay = document.getElementById("dueDateDisplay");
+        addNewRow(tbody) {
+            const row = tbody.insertRow();
+            for (let j = 0; j < 16; j++) {
+                const cell = row.insertCell();
+                if (j === 0) {
+                    cell.textContent = tbody.rows.length;
+                } else {
+                    this.setupCell(cell, j);
+                }
+            }
+        }
 
-            var currentDate = new Date();
-            issueDateInput.value = formatDate(currentDate);
+        setupCell(cell, columnIndex) {
+            if (columnIndex === 3 || columnIndex === 4 || columnIndex === 5) {
+                cell.classList.add('button-cell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', `${['BO', 'BO2', 'SN'][columnIndex - 3]} 按鈕`);
+            } else if (columnIndex === 6) {
+                cell.classList.add('over-cell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', 'over 按鈕');
+            } else if (columnIndex === 7) {
+                cell.classList.add('io-cell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', 'I/O 按鈕');
+            } else if (columnIndex === 8) {
+                cell.classList.add('lr-cell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', 'L/R 按鈕');
+            } else if (columnIndex === 9) {
+                cell.classList.add('chain-cell');
+                cell.setAttribute('tabindex', '0');
+            } else if (columnIndex === 10 || columnIndex === 11 || columnIndex === 12) {
+                cell.classList.add('clickable-cell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('role', 'button');
+                cell.setAttribute('aria-label', `${['bdrive', 'dbket', 'motor'][columnIndex - 10]} 按鈕`);
+            } else {
+                cell.setAttribute('tabindex', '0');
+            }
+        }
 
-            var dueDate = new Date(currentDate);
-            dueDate.setDate(dueDate.getDate() + 14);
-            dueDateDisplay.value = formatDate(dueDate);
+        setupEventListeners() {
+            this.table.addEventListener('click', (e) => this.handleTableClick(e));
+            this.table.addEventListener('focusin', (e) => this.handleTableFocusIn(e));
+            this.table.addEventListener('keydown', (e) => this.handleTableKeyDown(e));
+        }
 
-            issueDateInput.addEventListener("input", function () {
-                var parts = issueDateInput.value.split('/');
-                if (parts.length === 3) {
-                    var day = parseInt(parts[0], 10);
-                    var month = parseInt(parts[1], 10) - 1;
-                    var year = parseInt(parts[2], 10);
-                    var newIssueDate = new Date(year, month, day);
-                    if (!isNaN(newIssueDate)) {
-                        var newDueDate = new Date(newIssueDate);
-                        newDueDate.setDate(newDueDate.getDate() + 14);
-                        dueDateDisplay.value = formatDate(newDueDate);
+        handleTableClick(e) {
+            if (e.target.matches('.round-button')) {
+                this.handleRoundButtonClick(e.target);
+            } else if (e.target.matches('.over-cell, .io-cell, .lr-cell')) {
+                this.handleSpecialCellClick(e.target);
+            } else if (e.target.matches('.chain-cell')) {
+                this.handleChainCellClick(e.target);
+            } else if (e.target.matches('.clickable-cell')) {
+                this.handleClickableCell(e.target);
+            }
+        }
+
+        handleTableFocusIn(e) {
+            if (e.target.cellIndex > 0) {
+                this.setActiveCell(e.target);
+            }
+        }
+
+        handleTableKeyDown(e) {
+            if (e.target.cellIndex > 0) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInput('Enter');
+
+                    const currentRow = e.target.closest('tr');
+                    const currentRowIndex = currentRow.rowIndex;
+                    const wCell = currentRow.cells[1];
+                    const hCell = currentRow.cells[2];
+
+                    if (currentRowIndex === this.table.rows.length - 1 &&
+                        isValidInput(wCell.textContent) &&
+                        isValidInput(hCell.textContent)) {
+                        this.addNewRow(this.table.querySelector('tbody'));
+                        this.setActiveCell(this.table.rows[currentRowIndex + 1].cells[1]);
+                    }
+                } else if (e.key >= '0' && e.key <= '9' && this.numberInput.value.length < 4) {
+                    this.numberInput.value += e.key;
+                    validateInput();
+                }
+            }
+        }
+
+        handleRoundButtonClick(button) {
+            const row = button.closest('tr');
+            const columnIndex = button.closest('td, th').cellIndex;
+            const columnType = ['BO', 'BO2', 'SN'][columnIndex - 3];
+
+            ['BO', 'BO2', 'SN'].forEach(type => {
+                if (type !== columnType) {
+                    const otherColumnIndex = ['BO', 'BO2', 'SN'].indexOf(type) + 3;
+                    const otherButton = row.cells[otherColumnIndex].querySelector('.round-button');
+                    if (otherButton) {
+                        otherButton.classList.remove('active');
+                        otherButton.setAttribute('aria-pressed', 'false');
                     }
                 }
             });
-        });
-    </script>
-</body>
 
-</html>    `;
+            button.classList.toggle('active');
+            button.setAttribute('aria-pressed', button.classList.contains('active'));
+            this.updatePrices();
+        }
 
-    // Set the HTML content of the floating window
-    floatingWindow.document.open();
-    floatingWindow.document.write(htmlContent);
-    floatingWindow.document.close();
+        handleSpecialCellClick(cell) {
+            const row = cell.closest('tr');
+            const hCell = row.cells[2];
+            if (hCell.textContent) {
+                if (cell.classList.contains('over-cell')) {
+                    cell.textContent = cell.textContent === 'O' ? '' : 'O';
+                    cell.setAttribute('aria-label', cell.textContent === 'O' ? 'over 已啟用' : 'over 未啟用');
+                } else if (cell.classList.contains('io-cell')) {
+                    cell.textContent = cell.textContent === 'IN' ? 'OUT' : 'IN';
+                    cell.setAttribute('aria-label', `I/O 設置為 ${cell.textContent}`);
+                } else if (cell.classList.contains('lr-cell')) {
+                    cell.textContent = cell.textContent === 'R' ? 'L' : 'R';
+                    cell.setAttribute('aria-label', `L/R 設置為 ${cell.textContent}`);
+                }
+            }
+        }
 
-    // Function to copy the datatable and its styles
-    function copyDatatableAndStyles() {
-        // Get the middle-container element from the floating window (xOrderWindow)
-        const floatingMiddleContainer = floatingWindow.document.querySelector('.section.middle-container');
+        handleChainCellClick(cell) {
+            const row = cell.closest('tr');
+            const hCell = row.cells[2];
+            if (hCell.textContent) {
+                this.setActiveCell(cell);
+                this.numberInput.value = cell.textContent;
+                this.numberInput.focus();
+            }
+        }
 
-        // Get the table-container element from the original page (index.html)
-        const originalTableContainer = document.querySelector('.table-container');
+        handleClickableCell(cell) {
+            const row = cell.closest('tr');
+            const hCell = row.cells[2];
+            if (hCell.textContent) {
+                cell.textContent = cell.textContent === 'Yes' ? '' : 'Yes';
+                cell.setAttribute('aria-pressed', cell.textContent === 'Yes');
+            }
+        }
 
-        if (floatingMiddleContainer && originalTableContainer) {
-            // Clone the datatable element from the original page
-            const clonedDatatable = originalTableContainer.querySelector('#dataTable').cloneNode(true);
+        setActiveCell(cell) {
+            if (this.activeCell) {
+                this.activeCell.classList.remove('active-cell');
+                this.activeCell.classList.remove('error');
+                this.activeCell.classList.remove('success');
+                this.activeCell.classList.remove('invalid-input');
+            }
+            this.activeCell = cell;
+            this.activeCell.classList.add('active-cell');
+            this.numberInput.value = this.activeCell.textContent;
+            this.numberInput.style.backgroundColor = '';
+            inputError.textContent = '';
+            this.numberInput.focus();
+        }
 
-            // Get all styles from the original page
-            const styles = Array.from(document.styleSheets)
-                .filter(styleSheet => {
+        updatePrices() {
+            const rows = this.table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const width = parseFloat(row.cells[1].textContent);
+                const height = parseFloat(row.cells[2].textContent);
+                if (isValidInput(width) && isValidInput(height)) {
+                    let price;
                     try {
-                        return styleSheet.cssRules && styleSheet.cssRules.length > 0;
-                    } catch (e) {
-                        console.log('Cannot access styleSheet', e);
-                        return false;
-                    }
-                })
-                .map(styleSheet => {
-                    return Array.from(styleSheet.cssRules)
-                        .map(rule => rule.cssText)
-                        .join('\n');
-                })
-                .join('\n');
-
-            // Create a style element and add it to the floating window
-            const styleElement = floatingWindow.document.createElement('style');
-            styleElement.textContent = styles;
-            floatingWindow.document.head.appendChild(styleElement);
-
-            // Add specific styles for the table
-            const tableStyles = `
-                #dataTable {
-                    border-collapse: collapse;
-                    width: 100%;
-                }
-                #dataTable th, #dataTable td {
-                    border: 1px solid black;
-                    padding: 8px;
-                    text-align: left;
-                }
-                #dataTable th {
-                    background-color: #f2f2f2;
-                }
-            `;
-            const tableStyleElement = floatingWindow.document.createElement('style');
-            tableStyleElement.textContent = tableStyles;
-            floatingWindow.document.head.appendChild(tableStyleElement);
-
-            // Clear existing content
-            floatingMiddleContainer.innerHTML = '';
-            // Append the cloned datatable to the floating window's middle-container
-            floatingMiddleContainer.appendChild(clonedDatatable);
-            console.log('Datatable and styles copied successfully');
-
-            // Start the additional tasks
-            setTimeout(() => {
-                performAdditionalTasks(floatingWindow);
-            }, 900);
-        } else {
-            console.error('Required elements not found. Retrying...');
-            setTimeout(copyDatatableAndStyles, 100); // Retry after 100ms
-        }
-    }
-
-    // Start the copy process after a short delay
-    setTimeout(copyDatatableAndStyles, 500);
-}
-
-function performAdditionalTasks(floatingWindow) {
-    const table = floatingWindow.document.querySelector('#dataTable');
-    if (!table) {
-        console.error('Table not found');
-        return;
-    }
-
-    // 1. 再次複製 dataTable，並命名為 OriTable
-    const oriTable = table.cloneNode(true); // 深層複製 dataTable
-    oriTable.id = 'OriTable'; // 將新表格的 id 設置為 OriTable
-    oriTable.style.marginTop = '10px'; // 設置垂直距離為 10px
-
-
-    // 2. 找到 bottom-section，並將 OriTable 插入到 bottom-section 中
-    const bottomSection = floatingWindow.document.querySelector('.section.bottom-section');
-    if (bottomSection) {
-        bottomSection.appendChild(oriTable); // 將 OriTable 插入到 bottom-section 中
-        // 設置固定寬度和固定佈局
-        oriTable.style.tableLayout = 'fixed';
-        oriTable.style.width = '100%'; // 確保表格寬度為容器的 100%
-        oriTable.style.border = '1px solid black';
-        oriTable.style.borderCollapse = 'collapse';
-
-        // 為所有的 td 和 th 元素添加邊框
-        const cells = oriTable.querySelectorAll('td, th');
-        cells.forEach(cell => {
-            cell.style.border = '1px solid black';
-        });
-
-
-    } else {
-        console.error('bottom-section not found');
-        return;
-    }
-
-    // 3. 複製 totalprice 表格並命名為 OriPriceTable
-    const originalTotalPriceTable = document.querySelector('#totalprice'); // 從原始頁面查找 totalprice 表格
-    if (originalTotalPriceTable) {
-        const oriPriceTable = originalTotalPriceTable.cloneNode(true); // 深層複製 totalprice 表格
-        oriPriceTable.id = 'OriPriceTable'; // 設置 id 為 OriPriceTable
-        oriPriceTable.style.marginTop = '10px'; // 設置垂直距離為 10px
-
-        // 將 OriPriceTable 插入到 OriTable 後面（bottom-section 中）
-        bottomSection.appendChild(oriPriceTable);
-
-        // 調整 OriPriceTable 的寬度為 bottom-section 的 95%
-        oriPriceTable.style.width = '95%'; // 直接設置寬度為 95%
-        oriPriceTable.style.boxSizing = 'border-box'; // 確保 padding 不影響總寬度
-    } else {
-        console.warn('No totalprice table found. Skipping OriPriceTable creation.');
-    }
-
-    // 4. 使 middle-container 高度具有彈性（自適應內容高度）
-    const middleContainer = floatingWindow.document.querySelector('.section.middle-container');
-    if (middleContainer) {
-        middleContainer.style.overflow = 'hidden'; // 防止溢出
-        middleContainer.style.height = 'auto'; // 設置高度自適應
-    }
-
-    // 5. 針對 OriTable 的處理
-    // a. 修改第3列表頭為 FName 並清空該列所有單元格內容
-    const oriTableHeaders = oriTable.querySelectorAll('th');
-    if (oriTableHeaders[3]) {
-        oriTableHeaders[3].textContent = 'fname'; // 修改表頭為 FName
-        const col3Cells = oriTable.querySelectorAll('tr td:nth-child(4)');
-        col3Cells.forEach(cell => cell.textContent = ''); // 清空所有單元格內容
-    }
-
-    // b. 修改第4列表頭為 FColor 並清空該列所有單元格內容
-    if (oriTableHeaders[4]) {
-        oriTableHeaders[4].textContent = 'fcolor'; // 修改表頭為 FColor
-        const col4Cells = oriTable.querySelectorAll('tr td:nth-child(5)');
-        col4Cells.forEach(cell => cell.textContent = ''); // 清空所有單元格內容
-    }
-
-    // c. 刪除第15列（index 15）、第13列（index 13）、第5列（index 5）
-    deleteColumnByIndex(oriTable, 15); // 刪除第15列
-    deleteColumnByIndex(oriTable, 13); // 刪除第13列
-    deleteColumnByIndex(oriTable, 5);  // 刪除第5列
-    // 6. 修改 OriTable 列的寬度
-    const oriTableCols = oriTable.querySelectorAll('col');
-
-    // A. 縮小第一列、第二列、第三列、第八列、第十列、第十一列的寬度為原來的 80%
-    //[0, 1, 2, 7, 9, 10].forEach(index => {
-    //    if (oriTableCols[index]) {
-    //        oriTableCols[index].style.width = '70%';
-    //    }
-    //});
-
-    // B. 放大第四列與第五列的寬度為原來的 120%
-    //[3, 4].forEach(index => {
-    //    if (oriTableCols[index]) {
-    //        oriTableCols[index].style.width = '120%';
-    //    }
-    //});
-
-
-    // 以下是針對 dataTable 的一系列處理
-    moveColumnData(table, 1, 14);
-    moveColumnData(table, 2, 15);
-
-    changeColumnHeader(table, 1, 'FbName');
-    changeColumnHeader(table, 2, 'FbColor');
-
-    processColumn(table, 3, 'BO', floatingWindow);
-    processColumn(table, 4, 'BO2', floatingWindow);
-    processColumn(table, 5, 'SN', floatingWindow);
-
-    moveColumn(table, 6, 13);
-    changeColumnHeader(table, 3, 'Fb W');
-    changeColumnHeader(table, 4, 'Fb H');
-    clearColumnExceptHeader(table, 3);
-    clearColumnExceptHeader(table, 4);
-
-    subtractFromColumn(table, 14, 3, 31);
-    subtractFromColumn(table, 14, 5, 27);
-    subtractFromColumn(table, 14, 6, 31);
-
-    addToColumnAndMove(table, 15, 4, 200);
-
-    changeColumnHeader(table, 5, 'Tube');
-    changeColumnHeader(table, 6, 'Btm');
-    changeColumnHeader(table, 7, 'Over');
-
-    moveColumn(table, 13, 7);
-
-    changeColumnHeader(table, 10, 'Ori NO');
-    fillColumnWithNumbers(table, 10);
-
-    deleteColumns(table, [15, 13, 12, 11]);
-
-    // 6. 新增 copyNC 函數的執行
-    copyNC(table, oriTable);
-    // 調整 OriTable 列寬
-    adjustOriTableColumnWidths(oriTable);
-
-    processAndReorganizeTable(floatingWindow);
-}
-
-// 刪除指定索引的列
-function deleteColumnByIndex(table, index) {
-    const rows = table.rows;
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        row.deleteCell(index); // 刪除指定列的單元格
-    }
-}
-
-
-
-function moveColumnData(table, fromIndex, toIndex) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        const fromCell = rows[i].cells[fromIndex];
-        const toCell = rows[i].cells[toIndex];
-        toCell.textContent = fromCell.textContent;
-        fromCell.textContent = '';
-    }
-}
-
-function changeColumnHeader(table, columnIndex, newHeader) {
-    const cell = table.rows[0].cells[columnIndex];
-    cell.textContent = newHeader;
-    cell.style.fontSize = '45%'; // 將字體縮小一級
-}
-
-function processColumn(table, colIndex, columnName, floatingWindow) {
-    for (let i = 1; i < table.rows.length; i++) {
-        if (table.rows[i].cells[colIndex].querySelector('.round-button.active')) {
-            const name = promptForInput(`Input the name and color of the ${columnName}, Do not leave it blank`, 'Name', floatingWindow);
-            const color = promptForInput(`Input the name and color of the ${columnName}, Do not leave it blank`, 'Color', floatingWindow);
-
-            if (name && color) {
-                for (let j = 1; j < table.rows.length; j++) {
-
-                    if (table.rows[j].cells[colIndex].querySelector('.round-button.active')) {
-                        // 新增的步驟：根據 colIndex 設置背景顏色
-                        if (colIndex === 3) {
-                            table.rows[j].cells[0].style.backgroundColor = 'lightblue';
-                        } else if (colIndex === 4) {
-                            table.rows[j].cells[0].style.backgroundColor = 'lightyellow';
-                        } else if (colIndex === 5) {
-                            table.rows[j].cells[0].style.backgroundColor = 'pink';
+                        if (row.cells[3].querySelector('.round-button.active')) {
+                            price = memoFindPrice(width, height, priceDatabase.sunsetTable);
+                        } else if (row.cells[4].querySelector('.round-button.active')) {
+                            price = memoFindPrice(width, height, priceDatabase.wilsonTable);
+                        } else if (row.cells[5].querySelector('.round-button.active')) {
+                            price = memoFindPrice(width, height, priceDatabase.univiewTable);
+                        } else {
+                            price = '';
                         }
+                    } catch (error) {
+                        console.error('Error calculating price:', error);
+                        price = 'Error';
+                    }
 
-                        table.rows[j].cells[1].textContent = name;
-                        table.rows[j].cells[2].textContent = color;
+                    const priceCell = row.cells[14];
+                    if (typeof price === 'number') {
+                        priceCell.textContent = price.toLocaleString();
+                        priceCell.classList.remove('error');
+                    } else {
+                        priceCell.textContent = price;
+                        if (price === 'Error') {
+                            priceCell.classList.add('error');
+                        } else {
+                            priceCell.classList.remove('error');
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    const dataTable = new DataTable(document.getElementById('dataTable'));
+    window.dataTable = dataTable; // 將 dataTable 暴露給全局作用域
+
+    const memoFindPrice = (() => {
+        const cache = new Map();
+        return (width, height, table) => {
+            const key = `${width}-${height}-${table}`;
+            if (cache.has(key)) {
+                return cache.get(key);
+            }
+            const widthResult = priceDatabase.findNextRange(width, priceDatabase.widthRanges);
+            const heightResult = priceDatabase.findNextRange(height, priceDatabase.heightRanges);
+
+            if (!widthResult || !heightResult) {
+                return "not found, input smaller value";
+            }
+
+            const { index: widthIndex } = widthResult;
+            const { index: heightIndex } = heightResult;
+
+            const result = table?.[heightIndex]?.[widthIndex] ?? "not found";
+            cache.set(key, result);
+            return result;
+        };
+    })();
+
+    const numberInput = document.getElementById('numberInput');
+    const inputError = document.getElementById('inputError');
+    const numpadButtons = document.querySelectorAll('.numpad button');
+    const functionButtons = document.querySelectorAll('.function-keys-container button');
+    const errorSound = document.getElementById('errorSound');
+
+    const isValidInput = (value, min = 250, max = 3500) => {
+        if (value === '') return true;
+        const num = parseInt(value);
+        return !isNaN(num) && num >= min && num <= max;
+    };
+
+    const updateTargetCell = (value) => {
+        if (dataTable.activeCell) {
+            const isChainCell = dataTable.activeCell.cellIndex === 9;
+            const minValue = isChainCell ? 250 : 250;
+            const maxValue = isChainCell ? 3000 : 3500;
+
+            if (value === '' || isValidInput(value, minValue, maxValue)) {
+                if (dataTable.activeCell.cellIndex === 1 || dataTable.activeCell.cellIndex === 2) {
+                    if (value === '') {
+                        inputError.textContent = 'no blank left in W or H ';
+                        dataTable.activeCell.classList.add('invalid-input');
+                        return;
+                    }
+                }
+
+                dataTable.activeCell.textContent = value;
+                dataTable.activeCell.classList.remove('error', 'invalid-input');
+                dataTable.activeCell.classList.add('success');
+                numberInput.value = '';
+                numberInput.style.backgroundColor = '';
+                inputError.textContent = '';
+                highlightRow(dataTable.activeCell.parentElement.rowIndex);
+
+
+                if (dataTable.activeCell.cellIndex === 2) {
+                    const row = dataTable.activeCell.parentElement;
+                    const wCell = row.cells[1];
+                    if (wCell.textContent) {
+                        createButtonsAndSetDefaults(row);
+                    } else {
+                        inputError.textContent = 'W is blank ';
+                        wCell.classList.add('invalid-input');
+                        dataTable.setActiveCell(wCell);
+                        numberInput.focus();
+                        return;
+                    }
+                } else if (dataTable.activeCell.cellIndex === 1) {
+                    const row = dataTable.activeCell.parentElement;
+                    const hCell = row.cells[2];
+                    if (hCell.textContent) {
+                        createButtonsAndSetDefaults(row);
+                    }
+                }
+
+
+                if (dataTable.activeCell.cellIndex === 2) {
+                    const row = dataTable.activeCell.parentElement;
+                    const wCell = row.cells[1];
+                    if (!wCell.textContent) {
+                        wCell.classList.add('invalid-input');
+                        dataTable.setActiveCell(wCell);
+                        inputError.textContent = 'W is blank';
+                        numberInput.focus();
+                        return;
+                    }
+                }
+
+
+                const currentRow = dataTable.activeCell.closest('tr');
+                const currentRowIndex = currentRow.rowIndex;
+                const wCell = currentRow.cells[1];
+                const hCell = currentRow.cells[2];
+
+                if (currentRowIndex === dataTable.table.rows.length - 1 &&
+                    isValidInput(wCell.textContent) &&
+                    isValidInput(hCell.textContent)) {
+                    dataTable.addNewRow(dataTable.table.querySelector('tbody'));
+                }
+
+                if (dataTable.activeCell.parentElement.rowIndex < dataTable.table.rows.length - 1) {
+                    const nextRow = dataTable.activeCell.parentElement.nextElementSibling;
+                    const nextCell = nextRow.cells[dataTable.activeCell.cellIndex];
+                    dataTable.setActiveCell(nextCell);
+                }
+                scrollToRow(dataTable.activeCell.parentElement.rowIndex - 1);
+            } else if (value !== '') {
+                dataTable.activeCell.textContent = '';
+                dataTable.activeCell.classList.add('error', 'invalid-input');
+                numberInput.style.backgroundColor = 'var(--error-color)';
+                inputError.textContent = isChainCell ? 'Input 250-3000' : 'input 250-3500';
+            } else {
+                if (dataTable.activeCell.cellIndex === 2) {
+                    const row = dataTable.activeCell.parentElement;
+                    for (let i = 3; i <= 5; i++) {
+                        const button = row.cells[i].querySelector('.round-button');
+                        if (button) {
+                            row.cells[i].removeChild(button);
+                        }
+                    }
+                    row.cells[7].textContent = '';
+                    row.cells[8].textContent = '';
+                    row.cells[9].removeAttribute('contenteditable');
+                    row.cells[9].classList.remove('editable');
+
+                    // Disable bdrive, dbket, and motor cells
+                    for (let i = 10; i <= 12; i++) {
+                        row.cells[i].classList.remove('clickable');
+                        row.cells[i].textContent = '';
                     }
                 }
             }
-            break; // Exit after processing the first occurrence
         }
-    }
-}
+    };
 
-function promptForInput(message, field, floatingWindow) {
-    let input;
-    do {
-        input = floatingWindow.prompt(`${message}\n${field}:`);
-    } while (input === '');
-    return input;
-}
-
-function moveColumn(table, fromIndex, toIndex) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        rows[i].cells[toIndex].textContent = rows[i].cells[fromIndex].textContent;
-        rows[i].cells[fromIndex].textContent = '';
-    }
-}
-
-function clearColumnExceptHeader(table, columnIndex) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        rows[i].cells[columnIndex].textContent = '';
-    }
-}
-
-function subtractFromColumn(table, fromIndex, toIndex, subtrahend) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        const fromValue = parseFloat(rows[i].cells[fromIndex].textContent);
-        if (!isNaN(fromValue)) {
-            rows[i].cells[toIndex].textContent = (fromValue - subtrahend).toString();
-        }
-    }
-}
-
-function addToColumnAndMove(table, fromIndex, toIndex, addend) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        const fromValue = parseFloat(rows[i].cells[fromIndex].textContent);
-        if (!isNaN(fromValue)) {
-            rows[i].cells[toIndex].textContent = (fromValue + addend).toString();
-        }
-        rows[i].cells[fromIndex].textContent = '';
-    }
-}
-
-function fillColumnWithNumbers(table, columnIndex) {
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        rows[i].cells[columnIndex].textContent = i.toString();
-    }
-}
-
-function deleteColumns(table, columnIndexes) {
-    // 對索引進行排序和去重
-    const uniqueSortedIndexes = [...new Set(columnIndexes)].sort((a, b) => b - a);
-
-    const rows = table.rows;
-    for (let i = 0; i < rows.length; i++) {
-        for (let j = 0; j < uniqueSortedIndexes.length; j++) {
-            const columnIndex = uniqueSortedIndexes[j];
-            if (columnIndex < rows[i].cells.length) {
-                rows[i].deleteCell(columnIndex);
+    const createButtonsAndSetDefaults = (row) => {
+        for (let i = 3; i <= 5; i++) {
+            if (!row.cells[i].querySelector('.round-button')) {
+                const button = document.createElement('div');
+                button.className = 'round-button';
+                button.dataset.type = ['BO', 'BO2', 'SN'][i - 3];
+                button.setAttribute('role', 'button');
+                button.setAttribute('aria-label', `${['BO', 'BO2', 'SN'][i - 3]} 切換`);
+                button.setAttribute('tabindex', '0');
+                row.cells[i].appendChild(button);
             }
         }
-    }
-}
+        row.cells[7].textContent = 'IN';
+        row.cells[8].textContent = 'R';
+        row.cells[9].setAttribute('contenteditable', 'true');
+        row.cells[9].classList.add('editable');
 
-// Define the new function at the end of the file
-function processAndReorganizeTable(floatingWindow) {
-    const table = floatingWindow.document.querySelector('#dataTable');
-    if (!table) {
-        console.error('Table not found');
-        return;
-    }
-
-    // 1. Check index 0 row and record cell colors
-    const lightBlueRows = [];
-    const lightYellowRows = [];
-    const pinkRows = [];
-    const rows = table.rows;
-    for (let i = 1; i < rows.length; i++) {
-        const cell = rows[i].cells[0];
-        const backgroundColor = window.getComputedStyle(cell).backgroundColor;
-        if (backgroundColor === 'rgb(173, 216, 230)') { // Light blue
-            lightBlueRows.push(i);
-        } else if (backgroundColor === 'rgb(255, 255, 224)') { // Light yellow
-            lightYellowRows.push(i);
-        } else if (backgroundColor === 'rgb(255, 192, 203)') { // Pink
-            pinkRows.push(i);
+        // Enable bdrive, dbket, and motor cells
+        for (let i = 10; i <= 12; i++) {
+            row.cells[i].classList.add('clickable');
         }
-    }
+    };
 
-    // 2. Create a new table (datatable2) with the same size and style
-    const datatable2 = table.cloneNode(false);
-    table.parentNode.insertBefore(datatable2, table.nextSibling);
-
-    // 3. Copy the header from datatable to datatable2
-    datatable2.appendChild(rows[0].cloneNode(true));
-
-    // 4, 5, 6. Copy rows based on color groups
-    function copyRows(rowIndexes) {
-        for (const index of rowIndexes) {
-            datatable2.appendChild(rows[index].cloneNode(true));
+    const highlightRow = (rowIndex) => {
+        const rows = dataTable.table.querySelectorAll('tbody tr');
+        rows.forEach(row => row.classList.remove('highlight'));
+        if (rowIndex > 0 && rowIndex <= dataTable.table.rows.length - 1) {
+            rows[rowIndex - 1].classList.add('highlight');
         }
-    }
-    copyRows(lightBlueRows);
-    copyRows(lightYellowRows);
-    copyRows(pinkRows);
+    };
 
-    // 7. Delete the original datatable
-    table.parentNode.removeChild(table);
+    const scrollToRow = (rowIndex) => {
+        requestAnimationFrame(() => {
+            if (rowIndex >= 1 && rowIndex < dataTable.table.rows.length) {
+                const rowToScroll = dataTable.table.rows[rowIndex];
+                rowToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    };
 
-    // 8. Fill index 0 column with sequential numbers
-    for (let i = 1; i < datatable2.rows.length; i++) {
-        datatable2.rows[i].cells[0].textContent = i.toString();
-    }
-
-}
-
-function copyNC(dataTable, oriTable) {
-    // 取得 dataTable 第2列與第3列的所有單元格（跳過表頭）
-    const dataRows = dataTable.querySelectorAll('tr'); // 獲取所有行（包括表頭）
-    const oriRows = oriTable.querySelectorAll('tr');   // 獲取 oriTable 的所有行（包括表頭）
-
-    if (dataRows.length !== oriRows.length) {
-        console.warn('Row count mismatch between dataTable and oriTable');
-        return;
-    }
-
-    // 從第1行（index 1）開始，依序複製單元格內容
-    for (let i = 1; i < dataRows.length; i++) { // 跳過表頭（index 0）
-        const dataCells = dataRows[i].querySelectorAll('td'); // 取得 dataTable 當前行的所有單元格
-        const oriCells = oriRows[i].querySelectorAll('td');   // 取得 oriTable 當前行的所有單元格
-
-        if (dataCells[1]) {
-            oriCells[3].textContent = dataCells[1].textContent; // 將第2列（index 1）的內容複製到第4列（index 3）
+    const handleInput = (value) => {
+        if (value === 'Delete') {
+            numberInput.value = numberInput.value.slice(0, -1);
+        } else if (value === 'Enter') {
+            validateInput();
+            updateTargetCell(numberInput.value);
+        } else if (numberInput.value.length < 4) {
+            numberInput.value += value;
         }
-        if (dataCells[2]) {
-            oriCells[4].textContent = dataCells[2].textContent; // 將第3列（index 2）的內容複製到第5列（index 4）
+        validateInput();
+    };
+
+    const validateInput = () => {
+        if (!dataTable.activeCell) return;
+        if (numberInput.value === '') {
+            numberInput.style.backgroundColor = '';
+            inputError.textContent = '';
+            return;
         }
-    }
+        const isChainCell = dataTable.activeCell.cellIndex === 9;
+        const minValue = isChainCell ? 250 : 250;
+        const maxValue = isChainCell ? 3000 : 3500;
+        if (isValidInput(numberInput.value, minValue, maxValue)) {
+            numberInput.style.backgroundColor = '';
+            inputError.textContent = '';
+        } else {
+            numberInput.style.backgroundColor = 'var(--error-color)';
+            inputError.textContent = isChainCell ? 'input 250-3000' : 'input 250-3500';
+        }
+    };
 
-    console.log('Copy operation completed successfully');
-}
-
-function adjustOriTableColumnWidths(oriTable) {
-    // 創建 colgroup 標籤
-    const colGroup = document.createElement('colgroup');
-
-    // 定義每一列的寬度
-    const columnWidths = [
-        '14px',  // 第 1 列 NO
-        '18px',  // 第 2 列 W
-        '18px',  // 第 3 列 H
-        '24px',  // 第 4 列 name
-        '24px',  // 第 5 列 color
-        '17px',  // 第 6 列 over
-        '17px',  // 第 7 列 i/o
-        '15px',  // 第 8 列 LR
-        '19px',  // 第 9 列 chain
-        '15px',  // 第 10 列 drive
-        '15px',  // 第 11 列 bket
-        '15px',  // 第 12 列 motor
-        '15px'   // 第 13 列 price
-    ];
-
-    // 為每一列創建 col 標籤並設置寬度
-    columnWidths.forEach(width => {
-        const col = document.createElement('col');
-        col.style.width = width;
-        colGroup.appendChild(col);
+    numpadButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            handleInput(button.textContent);
+        });
     });
 
-    // 將 colgroup 插入到 oriTable 的開頭
-    oriTable.insertBefore(colGroup, oriTable.firstChild);
-}
+    functionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const value = button.textContent;
+            if (value === 'Reset') {
+                // 新增：檢查並刪除 totalprice 表格
+                const existingTotalPriceTable = document.getElementById('totalprice');
+                if (existingTotalPriceTable) {
+                    existingTotalPriceTable.remove();
+                }
 
+                // 原有的重置功能
+                dataTable.initializeTable();
+                numberInput.value = '';
+                inputError.textContent = '';
+                dataTable.activeCell = null;
+                dataTable.setActiveCell(dataTable.table.rows[1].cells[1]);
+                numberInput.focus();
+            } else if (value === 'W') {
+                dataTable.setActiveCell(dataTable.table.rows[1].cells[1]);
+                highlightRow(1);
+            } else if (value === 'H') {
+                dataTable.setActiveCell(dataTable.table.rows[1].cells[2]);
+                highlightRow(1);
+                dataTable.table.parentElement.scrollTop = 0;
+            } else if (value === 'Finish') {
+                if (typeof dataTable !== 'undefined' && dataTable !== null) {
+                    window.finishAndSubmit(dataTable); //finishAndSubmit(dataTable);另一個在701行
+                } else {
+                    console.error('dataTable is not defined');
+                    alert('An error occurred. Please try again.');
+                }
+            } else if (value === 'Chk Price') {
+                checkPrice();
+            }
+        });
+    });
 
+    numberInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleInput('Enter');
+        } else if (e.key === 'Backspace') {
+            handleInput('Delete');
+        }
+    });
 
+    document.addEventListener('submit', (e) => {
+        e.preventDefault();
+    });
 
+    document.addEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            e.preventDefault();
+            navigateTable(e.key);
+        }
+    });
 
+    const navigateTable = (key) => {
+        if (!dataTable.activeCell) {
+            dataTable.setActiveCell(dataTable.table.rows[1].cells[1]);
+            return;
+        }
+
+        const currentRow = dataTable.activeCell.parentElement.rowIndex;
+        const currentCol = dataTable.activeCell.cellIndex;
+
+        let newRow = currentRow;
+        let newCol = currentCol;
+
+        switch (key) {
+            case 'ArrowUp':
+                newRow = Math.max(1, currentRow - 1);
+                break;
+            case 'ArrowDown':
+                newRow = Math.min(dataTable.table.rows.length - 1, currentRow + 1);
+                break;
+            case 'ArrowLeft':
+                newCol = Math.max(1, currentCol - 1);
+                break;
+            case 'ArrowRight':
+                newCol = Math.min(15, currentCol + 1);
+                break;
+        }
+
+        const newCell = dataTable.table.rows[newRow].cells[newCol];
+        dataTable.setActiveCell(newCell);
+        scrollToRow(newRow - 1);
+        numberInput.focus();
+    };
+
+    window.addEventListener('load', () => {
+        dataTable.initializeTable();
+        numberInput.focus();
+        dataTable.setActiveCell(dataTable.table.rows[1].cells[1]);
+        highlightRow(1);
+    });
+
+    const updateColumnState = (columnType) => {
+        const headers = {
+            'BO': dataTable.table.querySelector('th.bo-header'),
+            'BO2': dataTable.table.querySelector('th.bo2-header'),
+            'SN': dataTable.table.querySelector('th.sn-header'),
+            'OVER': dataTable.table.querySelector('th.over-header'),
+            'IO': dataTable.table.querySelector('th.io-header'),
+            'LR': dataTable.table.querySelector('th.lr-header'),
+            'BDRIVE': dataTable.table.querySelector('th.bdrive-header'),
+            'DBKET': dataTable.table.querySelector('th.dbket-header'),
+            'MOTOR': dataTable.table.querySelector('th.motor-header')
+        };
+
+        const isActive = headers[columnType].classList.toggle('active');
+
+        Object.keys(headers).forEach(type => {
+            if (type !== columnType) {
+                headers[type].classList.remove('active');
+            }
+        });
+
+        const rows = dataTable.table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const hCell = row.cells[2];
+            if (hCell.textContent && isValidInput(hCell.textContent)) {
+                if (columnType === 'OVER') {
+                    const overCell = row.cells[6];
+                    overCell.textContent = isActive ? 'O' : '';
+                    overCell.style.fontWeight = isActive ? 'bold' : 'normal';
+                    overCell.style.textAlign = 'center';
+                } else if (columnType === 'IO') {
+                    const ioCell = row.cells[7];
+                    ioCell.textContent = isActive ? 'OUT' : 'IN';
+                } else if (columnType === 'LR') {
+                    const lrCell = row.cells[8];
+                    lrCell.textContent = isActive ? 'L' : 'R';
+                } else if (['BDRIVE', 'DBKET', 'MOTOR'].includes(columnType)) {
+                    const cellIndex = ['BDRIVE', 'DBKET', 'MOTOR'].indexOf(columnType) + 10;
+                    const cell = row.cells[cellIndex];
+                    cell.textContent = isActive ? 'Yes' : '';
+                } else {
+                    const cellIndex = ['BO', 'BO2', 'SN'].indexOf(columnType) + 3;
+                    const cell = row.cells[cellIndex];
+                    const button = cell.querySelector('.round-button');
+                    if (button) {
+                        if (isActive) {
+                            button.classList.add('active');
+                            button.setAttribute('aria-pressed', 'true');
+                            ['BO', 'BO2', 'SN'].forEach(type => {
+                                if (type !== columnType) {
+                                    const otherCellIndex = ['BO', 'BO2', 'SN'].indexOf(type) + 3;
+                                    const otherButton = row.cells[otherCellIndex].querySelector('.round-button');
+                                    if (otherButton) {
+                                        otherButton.classList.remove('active');
+                                        otherButton.setAttribute('aria-pressed', 'false');
+                                    }
+                                }
+                            });
+                        } else {
+                            button.classList.remove('active');
+                            button.setAttribute('aria-pressed', 'false');
+                        }
+                    }
+                }
+            }
+        });
+
+        if (['BO', 'BO2', 'SN'].includes(columnType)) {
+            dataTable.updatePrices();
+        }
+    };
+
+    ['bo-header', 'bo2-header', 'sn-header', 'over-header', 'io-header', 'lr-header', 'bdrive-header', 'dbket-header', 'motor-header'].forEach(headerClass => {
+        const header = dataTable.table.querySelector(`th.${headerClass}`);
+        header.addEventListener('click', () => {
+            updateColumnState(headerClass.split('-')[0].toUpperCase());
+        });
+    });
+
+    const checkPrice = () => {
+        console.log('Check Price button clicked');
+        dataTable.updatePrices();
+        alert('價格已更新');
+    };
+
+    const saveData = () => {
+        const data = [];
+        const rows = dataTable.table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const rowData = Array.from(row.cells).map(cell => cell.textContent);
+            data.push(rowData);
+        });
+        localStorage.setItem('tableData', JSON.stringify(data));
+    };
+
+    const loadData = () => {
+        const savedData = localStorage.getItem('tableData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            const tbody = dataTable.table.querySelector('tbody');
+            tbody.innerHTML = '';
+            data.forEach(rowData => {
+                const row = tbody.insertRow();
+                rowData.forEach((cellData, index) => {
+                    const cell = row.insertCell();
+                    cell.textContent = cellData;
+                    if (index === 3 || index === 4 || index === 5) {
+                        cell.classList.add('button-cell');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('aria-label', `${['BO', 'BO2', 'SN'][index - 3]} 按鈕`);
+                    } else if (index === 6) {
+                        cell.classList.add('over-cell');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('aria-label', 'over 按鈕');
+                    } else if (index === 7) {
+                        cell.classList.add('io-cell');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('aria-label', 'I/O 按鈕');
+                    } else if (index === 8) {
+                        cell.classList.add('lr-cell');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('aria-label', 'L/R 按鈕');
+                    } else if (index === 9) {
+                        cell.classList.add('chain-cell');
+                        cell.setAttribute('tabindex', '0');
+                    } else if (index === 10 || index === 11 || index === 12) {
+                        cell.classList.add('clickable-cell');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('aria-label', `${['bdrive', 'dbket', 'motor'][index - 10]} 按鈕`);
+                    } else {
+                        cell.setAttribute('tabindex', '0');
+                    }
+                });
+            });
+        }
+    };
+
+    setInterval(saveData, 30000);
+
+    document.getElementById('delRowBtn').addEventListener('click', () => {
+        const rowNumber = prompt("Which Row do you want to delete?");
+        ButtonModule.deleteRow(dataTable, rowNumber);
+    });
+
+    document.getElementById('insertRowBtn').addEventListener('click', () => {
+        const rowNumber = prompt("Below which Row do you want to insert a new row?");
+        ButtonModule.insertRow(dataTable, rowNumber);
+    });
+
+    // Make sure to expose necessary functions to the global scope
+    const setDataTable = window.setDataTable; //window.setDataTable = setDataTable;另一個在line 473
+    window.finishAndSubmit = finishAndSubmit;
+    window.totalpricetablesetup = totalpricetablesetup;
+    //window.deleteRow = deleteRow;
+    //window.insertRow = insertRow;
+    document.addEventListener('DOMContentLoaded', function () {
+        // 獲取 xQuo 按鈕元素
+        const xQuoButton = document.getElementById('xQuoButton');
+        // 如果按鈕存在，為其添加點擊事件監聽器
+        if (xQuoButton) {
+            xQuoButton.addEventListener('click', xQuo);
+        } else {
+            console.error('xQuo button not found in the document');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 獲取 xOdr 按鈕元素
+        const xOrderButton = document.getElementById('xOrderButton');
+        // 如果按鈕存在，為其添加點擊事件監聽器
+        if (xOrderButton) {
+            xOrderButton.addEventListener('click', xOrder);
+        } else {
+            console.error('xOrder button not found in the document');
+        }
+    });
+
+})();
 
