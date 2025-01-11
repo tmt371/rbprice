@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZ Blinds & Shutters Quotation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .section {
+            width: 20cm;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #F2F2F2;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            height: 180px;
+            /* 設定高度為 100px */
+        }
+
+        .header h1 {
+            color: #E97132;
+            margin: 0;
+        }
+
+        .company-info {
+            text-align: right;
+        }
+
+        .middle-container {
+            width: 20cm;
+            height: 25cm;
+            border: 1px solid black;
+            margin: 20px auto;
+        }
+
+        .bottom-section {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .date-input {
+            border: none;
+            border-bottom: 1px solid #333;
+            padding: 5px 0;
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section header">
+        <div>
+            <h1>Order list</h1>
+
+            <p>Customer: <span contenteditable="true"></span></p>
+            <p>Address: <span contenteditable="true"></span></p>
+            <p>Phone: <span contenteditable="true"></span></p>
+
+            <strong>Issue Date:</strong> <input type="text" class="date-input" id="issueDate">
+            <strong>Due Date:</strong> <input type="text" class="date-input" id="dueDateDisplay">
+        </div>
+        <div class="company-info">
+            <h2>Company: <span contenteditable="true"></span></h2>
+            <p>Ref: <span contenteditable="true"></span></p>
+            <p>email: ezblinds@ezbns.com.au</p>
+
+        </div>
+    </div>
+
+    <div class="section middle-container">
+        <!-- Content for the middle section can be added here -->
+    </div>
+
+    <div class="section bottom-section">
+        <div class="payment-method">
+            <table>
+                <tr>
+                    <th>Payment Method</th>
+                </tr>
+                <tr>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="total-summary">
+            <table>
+                <tr>
+                    <td>Sub Total:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Delivery:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Installation:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Extra:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>GST:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Discount:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Total:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Deposit:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+                <tr>
+                    <td>Balance:</td>
+                    <td contenteditable="true"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function formatDate(date) {
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                return `${day < 10 ? '0' + day : day}/${month < 10 ? '0' + month : month}/${year}`;
+            }
+
+            var issueDateInput = document.getElementById("issueDate");
+            var dueDateDisplay = document.getElementById("dueDateDisplay");
+
+            var currentDate = new Date();
+            issueDateInput.value = formatDate(currentDate);
+
+            var dueDate = new Date(currentDate);
+            dueDate.setDate(dueDate.getDate() + 14);
+            dueDateDisplay.value = formatDate(dueDate);
+
+            issueDateInput.addEventListener("input", function () {
+                var parts = issueDateInput.value.split('/');
+                if (parts.length === 3) {
+                    var day = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10) - 1;
+                    var year = parseInt(parts[2], 10);
+                    var newIssueDate = new Date(year, month, day);
+                    if (!isNaN(newIssueDate)) {
+                        var newDueDate = new Date(newIssueDate);
+                        newDueDate.setDate(newDueDate.getDate() + 14);
+                        dueDateDisplay.value = formatDate(newDueDate);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
