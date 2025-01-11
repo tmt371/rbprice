@@ -374,7 +374,9 @@ function moveColumnData(table, fromIndex, toIndex) {
 }
 
 function changeColumnHeader(table, columnIndex, newHeader) {
-    table.rows[0].cells[columnIndex].textContent = newHeader;
+    const cell = table.rows[0].cells[columnIndex];
+    cell.textContent = newHeader;
+    cell.style.fontSize = 'smaller'; // 將字體縮小一級
 }
 
 function processColumn(table, colIndex, columnName, floatingWindow) {
